@@ -40,6 +40,22 @@ class PlanViewSet(ReadOnlyModelViewSet):
     queryset = Plan.objects.all()
     serializer_class = PlanSerializer
 
+def get_user_from_request(request):
+    key = request.META.get('HTTP_AUTHORIZATION')
+    # print(key)
+    # print(type(key))
+
+    if key:
+        keyTok = key.split()
+        # print(keyTok)
+        # print(keyTok[1])
+        tokenObj = Token.objects.get(key=keyTok[1])
+        user = tokenObj.user.id
+    else:
+        user = request.user.id
+    return user
+
+
 class SubscriptionViewSet(ModelViewSet):
 
     serializer_class = SubscriptionSerializer
@@ -52,16 +68,19 @@ class SubscriptionViewSet(ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         try:
-            subs = Subscription.objects.filter(user=request.user)
+            usr = get_user_from_request(request)
+            subs = Subscription.objects.filter(user=usr)
+            # subs = Subscription.objects.filter(user=request.user)
             serializer = SubscriptionSerializer(subs, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({'error' : e.args}, status=status.HTTP_400_BAD_REQUEST)
 
     def retrieve(self, request, *args, **kwargs):
-
         try:
-            subs = Subscription.objects.filter(user=request.user, id=kwargs['pk'])
+            usr = get_user_from_request(request)
+            # subs = Subscription.objects.filter(user=request.user, id=kwargs['pk'])
+            subs = Subscription.objects.filter(user=usr, id=kwargs['pk'])
             serializer = SubscriptionSerializer(subs, many=True)
             return Response(serializer.data, status.HTTP_200_OK)
         except Exception as e:
@@ -69,6 +88,10 @@ class SubscriptionViewSet(ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         try:
+            usr = get_user_from_request(request)
+            if  usr != request.data['user']:
+                return Response({'error', 'Operation not allowed'},
+                                status=status.HTTP_401_UNAUTHORIZED)
             subs = Subscription()
             serializer = SubscriptionSerializer(subs, data=request.data)
             serializer.is_valid(raise_exception=True)
@@ -79,11 +102,15 @@ class SubscriptionViewSet(ModelViewSet):
 
     def update(self, request, *args, **kwargs):
         try:
-            if request.user.id != request.data['user']:
-                return Response({'error', 'Operation not allowed'},
-                         status=status.HTTP_400_BAD_REQUEST)
+            usr = get_user_from_request(request)
 
-            subs = Subscription.objects.get(user=request.user, id=kwargs['pk'])
+            # if request.user.id != request.data['user']:
+            if  usr != request.data['user']:
+                return Response({'error', 'Operation not allowed'},
+                         status=status.HTTP_401_UNAUTHORIZED)
+
+            subs = Subscription.objects.get(user=usr, id=kwargs['pk'])
+            # subs = Subscription.objects.get(user=request.user, id=kwargs['pk'])
             serializer = SubscriptionSerializer(subs, data=request.data)
             serializer.is_valid(raise_exception=True)
             serializer.save()
@@ -93,7 +120,12 @@ class SubscriptionViewSet(ModelViewSet):
 
     def partial_update(self, request, *args, **kwargs):
         try:
-            subs = Subscription.objects.get(user=request.user, id=kwargs['pk'])
+            usr = get_user_from_request(request)
+            if 'user' in request.data and usr != request.data['user']:
+                    return Response({'error', 'Operation not allowed'},
+                                    status=status.HTTP_401_UNAUTHORIZED)
+            subs = Subscription.objects.get(user=usr, id=kwargs['pk'])
+            # subs = Subscription.objects.get(user=request.user, id=kwargs['pk'])
             serializer = SubscriptionSerializer(subs, data=request.data, partial=True)
             serializer.is_valid(raise_exception=True)
             serializer.save()
@@ -113,7 +145,9 @@ class AppViewSet(ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         try:
-            apps = App.objects.filter(user=request.user)
+            usr = get_user_from_request(request)
+            apps = App.objects.filter(user=usr)
+            # apps = App.objects.filter(user=request.user)
             serializer = AppSerializer(apps, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
@@ -121,7 +155,9 @@ class AppViewSet(ModelViewSet):
 
     def retrieve(self, request, *args, **kwargs):
         try:
-            apps = App.objects.filter(user=request.user, id=kwargs['pk'])
+            usr = get_user_from_request(request)
+            apps = App.objects.filter(user=usr, id=kwargs['pk'])
+            # apps = App.objects.filter(user=request.user, id=kwargs['pk'])
             serializer = AppSerializer(apps, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
@@ -129,6 +165,10 @@ class AppViewSet(ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         try:
+            usr = get_user_from_request(request)
+            if  usr != request.data['user']:
+                return Response({'error', 'Operation not allowed'},
+                                status=status.HTTP_401_UNAUTHORIZED)
             subs = App()
             serializer = AppSerializer(subs, data=request.data)
             serializer.is_valid(raise_exception=True)
@@ -139,18 +179,28 @@ class AppViewSet(ModelViewSet):
 
     def update(self, request, *args, **kwargs):
         try:
-            apps = App.objects.get(user=request.user, id=kwargs['pk'])
+            usr = get_user_from_request(request)
+            if  usr != request.data['user']:
+                return Response({'error', 'Operation not allowed'},
+                                status=status.HTTP_401_UNAUTHORIZED)
+            apps = App.objects.get(user=usr, id=kwargs['pk'])
+            # apps = App.objects.get(user=request.user, id=kwargs['pk'])
             serializer = AppSerializer(apps, data=request.data)
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
-            print(e)
             return Response({'error' : e.args}, status=status.HTTP_400_BAD_REQUEST)
 
     def partial_update(self, request, *args, **kwargs):
         try:
-            subs = App.objects.get(user=request.user, id=kwargs['pk'])
+            usr = get_user_from_request(request)
+            if 'user' in request.data and usr != request.data['user']:
+                return Response({'error', 'Operation not allowed'},
+                                status=status.HTTP_401_UNAUTHORIZED)
+
+            subs = App.objects.get(user=usr, id=kwargs['pk'])
+            # subs = App.objects.get(user=request.user, id=kwargs['pk'])
             serializer = AppSerializer(subs, data=request.data, partial=True)
             serializer.is_valid(raise_exception=True)
             serializer.save()
@@ -161,7 +211,9 @@ class AppViewSet(ModelViewSet):
     def destroy(self, request, *args, **kwargs):
         # Should all associated subscription set to inactive?
         try:
-            apps = App.objects.filter(user=request.user, id=kwargs['pk'])
+            usr = get_user_from_request(request)
+            apps = App.objects.filter(user=usr, id=kwargs['pk'])
+            # apps = App.objects.filter(user=request.user, id=kwargs['pk'])
             apps.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Exception as e:
