@@ -8,16 +8,16 @@ from enum import Enum
 class App(models.Model):
 
     class appType(Enum):
-        ty1  = 'TP1'
-        ty2  = 'TP2'
+        ty1  = 'Web'
+        ty2  = 'Mobile'
 
         @classmethod
         def choices(cls):
             return tuple((i.name, i.value) for i in cls)
 
     class appFrameWork(Enum):
-        fw1  = 'FW1'
-        fw2  = 'FW2'
+        fw1  = 'Django'
+        fw2  = 'React Native'
 
         @classmethod
         def choices(cls):
@@ -25,8 +25,8 @@ class App(models.Model):
 
     name    =   models.CharField(max_length=50, null=False, unique=True) # validators=[minLengthValidator(1)])
     description = models.CharField(max_length=50)
-    type = models.CharField(max_length=2, choices=appType.choices())
-    framework = models.CharField(max_length=2, choices=appFrameWork.choices())
+    type = models.CharField(max_length=50, choices=appType.choices())
+    framework = models.CharField(max_length=50, choices=appFrameWork.choices())
     domain_name = models.CharField(max_length=50, null=True)
     screenshot = models.CharField(max_length=100, validators=[URLValidator()], null=True)
     user = models.ForeignKey(User, on_delete=None)
