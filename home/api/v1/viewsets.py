@@ -89,7 +89,7 @@ class SubscriptionViewSet(ModelViewSet):
     def create(self, request, *args, **kwargs):
         try:
             usr = get_user_from_request(request)
-            if  usr != request.data['user']:
+            if  usr != int(request.data['user']):
                 return Response({'error', 'Operation not allowed'},
                                 status=status.HTTP_401_UNAUTHORIZED)
             subs = Subscription()
@@ -105,7 +105,7 @@ class SubscriptionViewSet(ModelViewSet):
             usr = get_user_from_request(request)
 
             # if request.user.id != request.data['user']:
-            if  usr != request.data['user']:
+            if  usr != int(request.data['user']):
                 return Response({'error', 'Operation not allowed'},
                          status=status.HTTP_401_UNAUTHORIZED)
 
@@ -121,7 +121,7 @@ class SubscriptionViewSet(ModelViewSet):
     def partial_update(self, request, *args, **kwargs):
         try:
             usr = get_user_from_request(request)
-            if 'user' in request.data and usr != request.data['user']:
+            if 'user' in request.data and usr != int(request.data['user']):
                     return Response({'error', 'Operation not allowed'},
                                     status=status.HTTP_401_UNAUTHORIZED)
             subs = Subscription.objects.get(user=usr, id=kwargs['pk'])
@@ -165,8 +165,8 @@ class AppViewSet(ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         try:
-            usr = get_user_from_request(request)
-            if  usr != request.data['user']:
+            usr = get_user_from_request(request)            
+            if usr != int(request.data['user']):
                 return Response({'error', 'Operation not allowed'},
                                 status=status.HTTP_401_UNAUTHORIZED)
             subs = App()
@@ -180,7 +180,7 @@ class AppViewSet(ModelViewSet):
     def update(self, request, *args, **kwargs):
         try:
             usr = get_user_from_request(request)
-            if  usr != request.data['user']:
+            if  usr != int(request.data['user']):
                 return Response({'error', 'Operation not allowed'},
                                 status=status.HTTP_401_UNAUTHORIZED)
             apps = App.objects.get(user=usr, id=kwargs['pk'])
@@ -195,7 +195,7 @@ class AppViewSet(ModelViewSet):
     def partial_update(self, request, *args, **kwargs):
         try:
             usr = get_user_from_request(request)
-            if 'user' in request.data and usr != request.data['user']:
+            if 'user' in request.data and usr != int(request.data['user']):
                 return Response({'error', 'Operation not allowed'},
                                 status=status.HTTP_401_UNAUTHORIZED)
 
