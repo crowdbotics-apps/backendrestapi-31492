@@ -42,19 +42,14 @@ class PlanViewSet(ReadOnlyModelViewSet):
 
 def get_user_from_request(request):
     key = request.META.get('HTTP_AUTHORIZATION')
-    # print(key)
-    # print(type(key))
 
     if key:
         keyTok = key.split()
-        # print(keyTok)
-        # print(keyTok[1])
         tokenObj = Token.objects.get(key=keyTok[1])
         user = tokenObj.user.id
     else:
         user = request.user.id
     return user
-
 
 class SubscriptionViewSet(ModelViewSet):
 
@@ -62,7 +57,6 @@ class SubscriptionViewSet(ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        # subs = Subscription.objects.filter(user=self.request.user)
         subs = Subscription.objects.all()
         return subs
 
@@ -70,7 +64,6 @@ class SubscriptionViewSet(ModelViewSet):
         try:
             usr = get_user_from_request(request)
             subs = Subscription.objects.filter(user=usr)
-            # subs = Subscription.objects.filter(user=request.user)
             serializer = SubscriptionSerializer(subs, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
@@ -79,7 +72,6 @@ class SubscriptionViewSet(ModelViewSet):
     def retrieve(self, request, *args, **kwargs):
         try:
             usr = get_user_from_request(request)
-            # subs = Subscription.objects.filter(user=request.user, id=kwargs['pk'])
             subs = Subscription.objects.filter(user=usr, id=kwargs['pk'])
             serializer = SubscriptionSerializer(subs, many=True)
             return Response(serializer.data, status.HTTP_200_OK)
@@ -104,13 +96,11 @@ class SubscriptionViewSet(ModelViewSet):
         try:
             usr = get_user_from_request(request)
 
-            # if request.user.id != request.data['user']:
             if  usr != int(request.data['user']):
                 return Response({'error', 'Operation not allowed'},
                          status=status.HTTP_401_UNAUTHORIZED)
 
             subs = Subscription.objects.get(user=usr, id=kwargs['pk'])
-            # subs = Subscription.objects.get(user=request.user, id=kwargs['pk'])
             serializer = SubscriptionSerializer(subs, data=request.data)
             serializer.is_valid(raise_exception=True)
             serializer.save()
@@ -125,7 +115,6 @@ class SubscriptionViewSet(ModelViewSet):
                     return Response({'error', 'Operation not allowed'},
                                     status=status.HTTP_401_UNAUTHORIZED)
             subs = Subscription.objects.get(user=usr, id=kwargs['pk'])
-            # subs = Subscription.objects.get(user=request.user, id=kwargs['pk'])
             serializer = SubscriptionSerializer(subs, data=request.data, partial=True)
             serializer.is_valid(raise_exception=True)
             serializer.save()
@@ -147,7 +136,6 @@ class AppViewSet(ModelViewSet):
         try:
             usr = get_user_from_request(request)
             apps = App.objects.filter(user=usr)
-            # apps = App.objects.filter(user=request.user)
             serializer = AppSerializer(apps, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
@@ -157,7 +145,6 @@ class AppViewSet(ModelViewSet):
         try:
             usr = get_user_from_request(request)
             apps = App.objects.filter(user=usr, id=kwargs['pk'])
-            # apps = App.objects.filter(user=request.user, id=kwargs['pk'])
             serializer = AppSerializer(apps, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
@@ -184,7 +171,6 @@ class AppViewSet(ModelViewSet):
                 return Response({'error', 'Operation not allowed'},
                                 status=status.HTTP_401_UNAUTHORIZED)
             apps = App.objects.get(user=usr, id=kwargs['pk'])
-            # apps = App.objects.get(user=request.user, id=kwargs['pk'])
             serializer = AppSerializer(apps, data=request.data)
             serializer.is_valid(raise_exception=True)
             serializer.save()
@@ -200,7 +186,6 @@ class AppViewSet(ModelViewSet):
                                 status=status.HTTP_401_UNAUTHORIZED)
 
             subs = App.objects.get(user=usr, id=kwargs['pk'])
-            # subs = App.objects.get(user=request.user, id=kwargs['pk'])
             serializer = AppSerializer(subs, data=request.data, partial=True)
             serializer.is_valid(raise_exception=True)
             serializer.save()
@@ -213,7 +198,6 @@ class AppViewSet(ModelViewSet):
         try:
             usr = get_user_from_request(request)
             apps = App.objects.filter(user=usr, id=kwargs['pk'])
-            # apps = App.objects.filter(user=request.user, id=kwargs['pk'])
             apps.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Exception as e:

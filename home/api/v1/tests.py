@@ -1,15 +1,12 @@
-# from django.urls import reverse
 from rest_framework.reverse import reverse
 from rest_framework import status
-from rest_framework.test import APITestCase, APIClient
-# from myproject.apps.core.models import Account
+from rest_framework.test import APITestCase
 from users.models import User
 from subscriptions.models import Plan, Subscription
 from apps.models import App
 from rest_framework.authtoken.models import Token
 
 class RestApiTests(APITestCase):
-# class RestApiTests(APIClient):
 
     @classmethod
     def setUpTestData(cls):

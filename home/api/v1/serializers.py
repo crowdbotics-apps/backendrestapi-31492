@@ -93,27 +93,4 @@ class SubscriptionSerializer(serializers.ModelSerializer):
         model = Subscription
         fields = '__all__'
 
-    # app_id = serializers.PrimaryKeyRelatedField(
-    #     source='app',
-    #     queryset=App.objects.all()
-    # )
-    # # app = AppSerializer(read_only=True)
-    #
-    # plan_id = serializers.PrimaryKeyRelatedField(
-    #     source='plan',
-    #     queryset=Plan.objects.all()
-    # )
-    # # plan = PlanSerializer(read_only=True, many=False)
-    #
-    # user_id = serializers.PrimaryKeyRelatedField(
-    #     source='user',
-    #     queryset=User.objects.all()
-    # )
-    # # user = UserSerializer(read_only=True, many=False)
-    # class Meta:
-    #     model = Subscription
-    #     fields = ['id',
-    #               'app_id', 'plan_id', 'user_id',
-    #               'active', 'created_at', 'updated_at']
-        # fields = '__all__'
 

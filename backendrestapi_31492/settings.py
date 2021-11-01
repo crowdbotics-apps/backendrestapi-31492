@@ -47,12 +47,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sites',
-    'apps',
-    'subscriptions'
 ]
 LOCAL_APPS = [
     'home',
     'users.apps.UsersConfig',
+    'apps',
+    'subscriptions'
 ]
 THIRD_PARTY_APPS = [
     'rest_framework',
