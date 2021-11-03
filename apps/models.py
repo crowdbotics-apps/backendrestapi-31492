@@ -25,8 +25,8 @@ class App(models.Model):
 
     name    =   models.CharField(max_length=50, null=False, unique=True) # validators=[minLengthValidator(1)])
     description = models.CharField(max_length=50)
-    type = models.CharField(max_length=50, choices=appType.choices())
-    framework = models.CharField(max_length=50, choices=appFrameWork.choices())
+    type = models.CharField(max_length=50, choices=appType.choices(), default='Web', null=False)
+    framework = models.CharField(max_length=50, choices=appFrameWork.choices(), default='Django', null=False)
     domain_name = models.CharField(max_length=50, null=True)
     screenshot = models.CharField(max_length=100, validators=[URLValidator()], null=True)
     user = models.ForeignKey(User, on_delete=None)

@@ -19,7 +19,7 @@ class Plan(models.Model):
 class Subscription(models.Model):
     user = models.ForeignKey(User, on_delete=None)
     plan = models.ForeignKey(Plan, on_delete=None)
-    app = models.ForeignKey(App, on_delete=None)
+    app = models.ForeignKey(App, on_delete=models.SET_NULL, null=True, blank=False)
     active = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

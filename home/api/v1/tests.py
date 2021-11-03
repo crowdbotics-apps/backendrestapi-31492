@@ -18,10 +18,13 @@ class RestApiTests(APITestCase):
         testUser1 = User.objects.create_user(username='Test User1', email='tu1@test.com', password='password1')
         testUser2 = User.objects.create_user(username='Test User2', email='tu2@test.com', password='password2')
 
-        testApp1 = App.objects.create(name='App One', description='First Application', type='ty1', framework='fw1',
+        testApp1 = App.objects.create(id=1, name='App One', description='First Application', type='ty1', framework='fw1',
                                       user=testUser1)
-        testApp2 = App.objects.create(name='App Two', description='Second Application', type='ty2', framework='fw2',
+        testApp2 = App.objects.create(id=2, name='App Two', description='Second Application', type='ty2', framework='fw2',
+                                      user=testUser1)
+        testApp3 = App.objects.create(id=3, name='App Three', description='Third Application', type='ty2', framework='fw2',
                                       user=testUser2)
+
 
         testsubs1 = Subscription.objects.create(user=testUser1, plan=testPlanFree, app=testApp1, active=True)
         testsubs2 = Subscription.objects.create(user=testUser2, plan=testPlanStd, app=testApp2, active=False)
@@ -73,7 +76,7 @@ class RestApiTests(APITestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data[0]['name'], 'App One')
-        self.assertEqual(len(response.data), 1)
+        self.assertEqual(len(response.data), 2)
 
     def test_list_apps_unauthenticated(self):
         self.client.force_authenticate(user=None, token=None)
@@ -170,9 +173,9 @@ class RestApiTests(APITestCase):
         self.assertEqual(resp.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_app_delete(self):
-        url = reverse('apps-detail', kwargs={"pk": 3})
+        url = reverse('apps-detail', kwargs={"pk": 2})
         response = self.client.get(url)
-        response = self.client.delete(url, dict(response.data), format='json')
+        response = self.client.delete(url, dict(response.data[0]), format='json')
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
     def test_list_subscription(self):

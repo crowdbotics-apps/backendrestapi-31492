@@ -51,6 +51,15 @@ def get_user_from_request(request):
         user = request.user.id
     return user
 
+def is_user_authorized_for_app(appInfo, usr):
+
+    userApps = App.objects.filter(user=usr)
+
+    for obj in userApps:
+        if str(obj.id) == appInfo:
+            return True
+    return False
+
 class SubscriptionViewSet(ModelViewSet):
 
     serializer_class = SubscriptionSerializer
@@ -82,7 +91,12 @@ class SubscriptionViewSet(ModelViewSet):
         try:
             usr = get_user_from_request(request)
             if  usr != int(request.data['user']):
-                return Response({'error', 'Operation not allowed'},
+                return Response({'error', 'Operation not allowed for this user'},
+                                status=status.HTTP_401_UNAUTHORIZED)
+
+            appInfo = str(request.data['app']).strip()
+            if appInfo == "" or (not is_user_authorized_for_app(appInfo, usr)):
+                return Response({'error', 'Improper app for the user'},
                                 status=status.HTTP_401_UNAUTHORIZED)
             subs = Subscription()
             serializer = SubscriptionSerializer(subs, data=request.data)
@@ -96,9 +110,14 @@ class SubscriptionViewSet(ModelViewSet):
         try:
             usr = get_user_from_request(request)
 
-            if  usr != int(request.data['user']):
-                return Response({'error', 'Operation not allowed'},
+            if usr != int(request.data['user']):
+                return Response({'error', 'Operation not allowed for this user'},
                          status=status.HTTP_401_UNAUTHORIZED)
+
+            appInfo = str(request.data['app']).strip()
+            if appInfo == "" or not is_user_authorized_for_app(appInfo, usr):
+                return Response({'error', 'Improper app for the user'},
+                                status=status.HTTP_401_UNAUTHORIZED)
 
             subs = Subscription.objects.get(user=usr, id=kwargs['pk'])
             serializer = SubscriptionSerializer(subs, data=request.data)
@@ -112,8 +131,15 @@ class SubscriptionViewSet(ModelViewSet):
         try:
             usr = get_user_from_request(request)
             if 'user' in request.data and usr != int(request.data['user']):
-                    return Response({'error', 'Operation not allowed'},
+                    return Response({'error', 'Operation not allowed for this user'},
                                     status=status.HTTP_401_UNAUTHORIZED)
+
+            if 'app' in request.data:
+                appInfo = str(request.data['app']).strip()
+                if appInfo == "" or (not is_user_authorized_for_app(appInfo, usr)):
+                    return Response({'error', 'Improper app for the user'},
+                                status=status.HTTP_401_UNAUTHORIZED)
+
             subs = Subscription.objects.get(user=usr, id=kwargs['pk'])
             serializer = SubscriptionSerializer(subs, data=request.data, partial=True)
             serializer.is_valid(raise_exception=True)
@@ -154,7 +180,7 @@ class AppViewSet(ModelViewSet):
         try:
             usr = get_user_from_request(request)            
             if usr != int(request.data['user']):
-                return Response({'error', 'Operation not allowed'},
+                return Response({'error', 'Operation not allowed for this user'},
                                 status=status.HTTP_401_UNAUTHORIZED)
             subs = App()
             serializer = AppSerializer(subs, data=request.data)
@@ -168,7 +194,7 @@ class AppViewSet(ModelViewSet):
         try:
             usr = get_user_from_request(request)
             if  usr != int(request.data['user']):
-                return Response({'error', 'Operation not allowed'},
+                return Response({'error', 'Operation not allowed for this user'},
                                 status=status.HTTP_401_UNAUTHORIZED)
             apps = App.objects.get(user=usr, id=kwargs['pk'])
             serializer = AppSerializer(apps, data=request.data)
@@ -182,7 +208,7 @@ class AppViewSet(ModelViewSet):
         try:
             usr = get_user_from_request(request)
             if 'user' in request.data and usr != int(request.data['user']):
-                return Response({'error', 'Operation not allowed'},
+                return Response({'error', 'Operation not allowed for this user'},
                                 status=status.HTTP_401_UNAUTHORIZED)
 
             subs = App.objects.get(user=usr, id=kwargs['pk'])
@@ -197,8 +223,14 @@ class AppViewSet(ModelViewSet):
         # Should all associated subscription set to inactive?
         try:
             usr = get_user_from_request(request)
-            apps = App.objects.filter(user=usr, id=kwargs['pk'])
+            subs = Subscription.objects.filter(user=usr, app=kwargs['pk'])
+            for obj in subs:
+                obj.active = False
+                obj.save()
+
+            apps = App.objects.get(user=usr, id=kwargs['pk'])
             apps.delete()
+
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Exception as e:
             return Response({'error' : e.args}, status=status.HTTP_400_BAD_REQUEST)
